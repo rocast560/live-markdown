@@ -1,3 +1,5 @@
+<img src="images/icon.png" alt="" width="96">
+
 # Live Markdown
 
 A VS Code editor for markdown files that works like Obsidian's live preview. The file stays plain markdown, but formatting is drawn as you type and the raw syntax only shows up on the part you're editing.
