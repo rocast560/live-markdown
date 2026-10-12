@@ -1,0 +1,218 @@
+{
+  "name": "live-markdown",
+  "displayName": "Live Markdown (Obsidian-style)",
+  "description": "Edit markdown the way Obsidian does: formatting renders as you type and the raw syntax only appears where your cursor is.",
+  "version": "0.3.0",
+  "publisher": "local",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rocast560/live-markdown"
+  },
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#2a1d5c",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "liveMarkdown.editor",
+        "displayName": "Live Markdown (Obsidian-style)",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          },
+          {
+            "filenamePattern": "*.markdown"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "liveMarkdown.toggleSourceMode",
+        "title": "Toggle Live Preview / Source Mode",
+        "category": "Live Markdown",
+        "icon": "$(book)"
+      },
+      {
+        "command": "liveMarkdown.openSource",
+        "title": "Open as Plain Text",
+        "category": "Live Markdown",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "liveMarkdown.openLivePreview",
+        "title": "Open in Live Preview",
+        "category": "Live Markdown",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "liveMarkdown.toggleSourceMode",
+          "when": "activeCustomEditorId == liveMarkdown.editor",
+          "group": "navigation@1"
+        },
+        {
+          "command": "liveMarkdown.openSource",
+          "when": "activeCustomEditorId == liveMarkdown.editor",
+          "group": "navigation@2"
+        },
+        {
+          "command": "liveMarkdown.openLivePreview",
+          "when": "editorLangId == markdown && !activeCustomEditorId",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "liveMarkdown.toggleSourceMode",
+          "when": "activeCustomEditorId == liveMarkdown.editor"
+        },
+        {
+          "command": "liveMarkdown.openSource",
+          "when": "activeCustomEditorId == liveMarkdown.editor"
+        },
+        {
+          "command": "liveMarkdown.openLivePreview",
+          "when": "editorLangId == markdown"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Live Markdown",
+      "properties": {
+        "liveMarkdown.look": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "default"
+          ],
+          "enumDescriptions": [
+            "Obsidian's Minimal theme set up like my vault: coloured headings, #ff6c52 accent, Bahnschrift, round checkboxes, outlined tags.",
+            "Obsidian's default theme (purple accent)."
+          ],
+          "default": "minimal",
+          "description": "Which Obsidian theme the editor imitates."
+        },
+        "liveMarkdown.colorScheme": {
+          "type": "string",
+          "enum": [
+            "obsidian",
+            "vscode"
+          ],
+          "enumDescriptions": [
+            "Obsidian's own light/dark colours (follows the VS Code theme's brightness).",
+            "Use the current VS Code theme's editor background and text colours."
+          ],
+          "default": "obsidian",
+          "description": "Colour scheme for the editor."
+        },
+        "liveMarkdown.fontSize": {
+          "type": "number",
+          "default": 16,
+          "minimum": 8,
+          "maximum": 40,
+          "description": "Text size in pixels (Obsidian's default is 16)."
+        },
+        "liveMarkdown.fontFamily": {
+          "type": "string",
+          "default": "",
+          "description": "Text font. Empty uses the look's font (Bahnschrift for Minimal, the system font for Default)."
+        },
+        "liveMarkdown.monospaceFontFamily": {
+          "type": "string",
+          "default": "",
+          "description": "Code font. Empty uses Obsidian's default monospace stack."
+        },
+        "liveMarkdown.readableLineLength": {
+          "type": "boolean",
+          "default": true,
+          "description": "Limit the text width and centre it, like Obsidian's “Readable line length”."
+        },
+        "liveMarkdown.lineWidth": {
+          "type": "number",
+          "default": 700,
+          "minimum": 300,
+          "description": "Maximum text width in pixels when readable line length is on."
+        },
+        "liveMarkdown.showInlineTitle": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the file name as a title at the top of the note."
+        },
+        "liveMarkdown.accentColor": {
+          "type": "string",
+          "default": "",
+          "description": "Accent colour for links, tags and checkboxes (any CSS colour). Empty uses the look's accent (#ff6c52 for Minimal, purple for Default)."
+        },
+        "liveMarkdown.headingColor": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Colour for headings (any CSS colour, e.g. `#e0af68`, `tomato` or `var(--text-accent)`). Empty uses the normal text colour, as in Obsidian."
+        },
+        "liveMarkdown.headingColors": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": false,
+          "properties": {
+            "h1": { "type": "string", "description": "Heading 1 colour" },
+            "h2": { "type": "string", "description": "Heading 2 colour" },
+            "h3": { "type": "string", "description": "Heading 3 colour" },
+            "h4": { "type": "string", "description": "Heading 4 colour" },
+            "h5": { "type": "string", "description": "Heading 5 colour" },
+            "h6": { "type": "string", "description": "Heading 6 colour" }
+          },
+          "markdownDescription": "Colours for individual heading levels, overriding `#liveMarkdown.headingColor#` (e.g. `{ \"h1\": \"#e06c75\" }`)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "node build.mjs && node test/runTests.js",
+    "package": "node build.mjs --production && vsce package --no-dependencies --allow-missing-repository --skip-license --no-rewrite-relative-links -o live-markdown.vsix"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/language-data": "^6.5.2",
+    "@codemirror/search": "^6.7.2",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.14",
+    "@lezer/common": "^1.5.3",
+    "@lezer/highlight": "^1.2.5",
+    "@lezer/markdown": "^1.8.0",
+    "@types/markdown-it": "^14.2.0",
+    "@types/node": "^20.19.43",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "markdown-it": "^15.0.2",
+    "mathjax": "^3.2.2",
+    "mermaid": "^12.1.0",
+    "typescript": "^7.0.2"
+  }
+}

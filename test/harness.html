@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- Browser harness: loads the webview bundle the way VS Code does, with a fake
+     host. Serve the repo root (node test/serve.mjs) and open /test/harness.html.
+     ?theme=light switches to the light palette, ?file=name.md loads another fixture. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'nonce-harness' 'self'; connect-src 'self'">
+  <link rel="stylesheet" href="../media/webview.css">
+  <title>Live Markdown harness</title>
+</head>
+<body class="vscode-dark">
+  <div id="app" data-mathjax="../media/mathjax/tex-svg-full.js" data-mermaid="../media/mermaid.min.js"><div id="editor"></div></div>
+  <script nonce="harness">
+    const params = new URLSearchParams(location.search);
+    if (params.get("theme") === "light") document.body.className = "vscode-light";
+    const base = new URL("fixtures/", location.href).toString();
+    window.__messages = [];
+    window.__edits = [];
+    window.__leakedKeys = [];
+    // VS Code's webview host listens for keydown on the window (bubble phase) and
+    // forwards keys to the workbench. Record what would have leaked through.
+    window.addEventListener("keydown", (e) => { if (e.ctrlKey || e.metaKey) window.__leakedKeys.push(e.key); });
+    const reply = (requestId, result) => window.postMessage({ type: "response", requestId, result }, "*");
+    async function handle(m) {
+      window.__messages.push(m);
+      switch (m.type) {
+        case "ready": {
+          const file = params.get("file") ?? "sample.md";
+          const text = await (await fetch(base + file)).text();
+          window.postMessage({
+            type: "init", text, fileName: file.replace(/\.md$/, ""), baseUri: base,
+            noteNames: ["Other Note", "Sample note", "Daily log"],
+            config: { look: params.get("look") ?? "minimal", colorScheme: "obsidian", fontSize: 16, fontFamily: "", monospaceFontFamily: "", readableLineLength: true, lineWidth: 700, showInlineTitle: true, accentColor: "" },
+          }, "*");
+          break;
+        }
+        case "edit": window.__edits.push(m.changes); break;
+        case "resolveEmbed": {
+          const name = m.target;
+          if (/\.svg$/.test(name)) reply(m.requestId, { kind: "image", uri: base + "attachments/" + name, name });
+          else if (/^other note$/i.test(name)) reply(m.requestId, { kind: "note", uri: base + "Other Note.md", name: "Other Note", markdown: await (await fetch(base + "Other%20Note.md")).text() });
+          else reply(m.requestId, { kind: "missing", name });
+          break;
+        }
+        case "resolveImage": reply(m.requestId, null); break;
+        case "log": console.log("[webview " + m.level + "]", m.message); break;
+      }
+    }
+    window.acquireVsCodeApi = () => ({
+      postMessage: (m) => { void handle(m); },
+      getState: () => window.__state,
+      setState: (s) => { window.__state = s; },
+    });
+  </script>
+  <script nonce="harness" src="../media/webview.js"></script>
+</body>
+</html>

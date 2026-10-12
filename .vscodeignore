@@ -1,0 +1,7 @@
+**
+!dist/extension.js
+!media/**
+!package.json
+!README.md
+!images/icon.png
+media/**/*.map
